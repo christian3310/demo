@@ -1,16 +1,13 @@
 import asyncio
-import json
 from collections import defaultdict
 from datetime import date
 
 from app.models import Industry, IndustryReport, Stock
 from app.parsers import IndustryParser, IndustryReportParser, StockParser
-from app.utils import LOCAL_STORAGE, split
+from app.utils import save_json_to_local, split
 
 
 class StockManager:
-    local_file = LOCAL_STORAGE / 'listed.json'
-
     def __init__(self):
         self.parser = StockParser()
     
@@ -22,10 +19,9 @@ class StockManager:
         return await self.parser.get_stocks()
     
     def save_to_local(self, stocks: list[Stock]):
-        with open(self.local_file, 'w', encoding='utf-8') as f:
-            wanted = {'ticker', 'name', 'listed_at', 'industry'}
-            data = [stock.dict(include=wanted) for stock in stocks]
-            json.dump(data, f, indent=4, ensure_ascii=False)
+        wanted = {'ticker', 'name', 'listed_at', 'industry'}
+        data = [stock.dict(include=wanted) for stock in stocks]
+        save_json_to_local('listed.json', data, indent=4, ensure_ascii=False)
 
 
 class IndustryManager:
@@ -89,6 +85,5 @@ class IndustryManager:
 
     def save_top3_reports_to_local(self, reports: list):
         for report in reports:
-            filename = f'./data/{report["industry"]}_top3.json'
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(report['data'], f, indent=4)
+            filename = f'{report["industry"]}_top3.json'
+            save_json_to_local(filename, report['data'], indent=4)
