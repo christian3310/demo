@@ -26,7 +26,7 @@ class StockManager:
         json_dump_conf = {'indent': 4, 'ensure_ascii': False}
         if dist == 'local':
             save_json_to_local(filename, data, json_dump_conf)
-        elif dist == 'cloud':
+        else:
             save_json_to_s3(filename, data, json_dump_conf)
 
 
