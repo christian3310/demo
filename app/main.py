@@ -17,5 +17,4 @@ async def main(target_date, target_dist):
 
     reports = await industry_manager.get_reports(industries, target_date)
     top3_reports = await industry_manager.calculate_top3(reports, stocks)
-    industry_manager.save_top3_reports_to_local(top3_reports)
     industry_manager.save_top3_reports(top3_reports, dist=target_dist)
