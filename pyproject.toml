@@ -9,6 +9,7 @@ python = "^3.9"
 httpx = "^0.23.0"
 lxml = "^4.9.0"
 pydantic = "^1.9.1"
+boto3 = "^1.24.11"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=6.1.0"

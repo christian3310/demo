@@ -5,9 +5,20 @@ from datetime import date, datetime
 
 from .main import main
 
+
 HELPS = '''
 Parse and save listed stocks information and the daily top3 stocks of each industry.
 '''
+
+
+def parse_date(date_str: str) -> datetime:
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d')
+    except TypeError:
+        logging.debug('invalid date format, use today')
+        target_date = date.today()
+    finally:
+        return target_date
 
 
 parser = argparse.ArgumentParser(
@@ -26,16 +37,21 @@ parser.add_argument(
     type=str,
     help='parse specific date, the valid format is yyyy-mm-dd, set as today if not specify'
 )
+parser.add_argument(
+    '-b',
+    '--bucket',
+    type=str,
+    default='local',
+    help='the target bucket to save, saving to local folder if not assigned'
+)
 
 args = parser.parse_args()
 log_level = logging.DEBUG if args.verbose else logging.INFO
 logging.basicConfig(level=log_level)
-try:
-    target_date = datetime.strptime(args.date, '%Y-%m-%d')
-except TypeError:
-    logging.debug('invalid date format, use today')
-    target_date = date.today()
+
+target_date = parse_date(args.date)
+target_dist = args.bucket
 
 logging.info(f'{datetime.now()} start')
-asyncio.run(main(target_date))
+asyncio.run(main(target_date, target_dist))
 logging.info(f'{datetime.now()} complete')

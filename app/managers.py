@@ -4,7 +4,7 @@ from datetime import date
 
 from app.models import Industry, IndustryReport, Stock
 from app.parsers import IndustryParser, IndustryReportParser, StockParser
-from app.utils import save_json_to_local, split
+from app.utils import save_json_to_local, save_json_to_s3, split
 
 
 class StockManager:
@@ -18,10 +18,16 @@ class StockManager:
     async def get_stocks(self) -> list[Stock]:
         return await self.parser.get_stocks()
     
-    def save_to_local(self, stocks: list[Stock]):
+    def save(self, stocks: list[Stock], dist: str = 'local'):
         wanted = {'ticker', 'name', 'listed_at', 'industry'}
         data = [stock.dict(include=wanted) for stock in stocks]
-        save_json_to_local('listed.json', data, indent=4, ensure_ascii=False)
+
+        filename = 'listed.json'
+        json_dump_conf = {'indent': 4, 'ensure_ascii': False}
+        if dist == 'local':
+            save_json_to_local(filename, data, json_dump_conf)
+        else:
+            save_json_to_s3(filename, data, json_dump_conf)
 
 
 class IndustryManager:
@@ -70,7 +76,11 @@ class IndustryManager:
             'data': data[:3]
         }
 
-    async def calculate_top3(self, reports: list[IndustryReport], stocks: list[Stock]) -> list[dict]:
+    async def calculate_top3(
+        self,
+        reports: list[IndustryReport],
+        stocks: list[Stock]
+    ) -> list[dict]:
         scopes = defaultdict(set)
         for stock in stocks:
             scopes[stock.industry].add(stock.ticker)
@@ -87,3 +97,10 @@ class IndustryManager:
         for report in reports:
             filename = f'{report["industry"]}_top3.json'
             save_json_to_local(filename, report['data'], indent=4)
+
+    def save_top3_reports(self, reports: list, dist: str = 'local'):
+        json_dump_conf = {'indent': 4}
+        save_func = save_json_to_local if dist == 'local' else save_json_to_s3
+        for report in reports:
+            filename = f'{report["industry"]}_top3.json'
+            save_func(filename, report['data'], json_dump_conf, dist=dist)
