@@ -50,5 +50,11 @@ jobs:
           ECR_REPOSITORY: statementdog_demo
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build \
+            --build-arg _AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+            --build-arg _AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+            --build-arg _BUCKET=stock-data-demo \
+            -f Dockerfile \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
