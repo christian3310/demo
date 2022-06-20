@@ -17,4 +17,4 @@ RUN pip install -U poetry
 RUN poetry install --no-dev
 
 ENTRYPOINT [ "poetry", "run" ]
-CMD [ "python", "-m", "app", "-b", "${S3_BUCKET}" ]
+CMD python -m app -b ${S3_BUCKET}
